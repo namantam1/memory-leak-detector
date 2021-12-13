@@ -1,0 +1,5 @@
+*.o
+*.out
+example
+test
+*.exe
