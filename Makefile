@@ -1,5 +1,5 @@
 CC=gcc
-CGLAGS=-Wall -Werror -Wextra
+CFLAGS=-Wall -g
 BINS=example
 
 all: $(BINS)
