@@ -35,7 +35,7 @@ static struct MemData {
     size_t total_freed;
 } memoryData;
 
-bool insert(void *ptr, size_t size, int line, char *file) {
+static bool _insert(void *ptr, size_t size, int line, char *file) {
     uint32_t i;
     const size_t address = (size_t)ptr;
     if ((i = memoryData.current) < LEAK_MEM_SIZE) {
@@ -47,6 +47,7 @@ bool insert(void *ptr, size_t size, int line, char *file) {
         memoryData.current++;
         memoryData.allocations++;
         memoryData.total_allocated += size;
+        return true;
     }
     return false;
 }
@@ -54,7 +55,7 @@ bool insert(void *ptr, size_t size, int line, char *file) {
 /**
  * @return: 0 if success else -1
 */
-uint8_t delete(void *ptr) {
+static uint8_t _delete(void *ptr) {
     const size_t address = (size_t)ptr;
 
     if (ptr != NULL) {
@@ -64,13 +65,13 @@ uint8_t delete(void *ptr) {
 
                 memoryData.free++;
                 memoryData.total_freed += memoryData.mem[i].size;
-                return 0;
+                return true;
             }
         }
     }
 
     memoryData.free++;
-    return -1;
+    return false;
 }
 
 void _generate_report() {
@@ -114,7 +115,7 @@ void *_malloc(size_t size, char *file, int line) {
         return ptr;
     }
 
-    insert(ptr, size, line, file);
+    _insert(ptr, size, line, file);
     return ptr;
 }
 
@@ -127,7 +128,7 @@ void *_calloc(size_t num, size_t size, char *file, int line) {
         return ptr;
     }
 
-    insert(ptr, num * size, line, file);
+    _insert(ptr, num * size, line, file);
     return ptr;
 }
 
@@ -143,11 +144,11 @@ void *_realloc(void *ptr, size_t size, char *file, int line) {
         return ptr;
     }
 
-    if (delete(ptr) < 0) {
+    if (!_delete(ptr)) {
         _leak_warn(file, line, "Double free detected");
         exit(EXIT_FAILURE);
     }
-    insert(new_ptr, size, line, file);
+    _insert(new_ptr, size, line, file);
 
     return new_ptr;
 }
@@ -158,7 +159,7 @@ void _free(void *ptr, char *file, int line) {
     }
 
     free(ptr);
-    if (delete(ptr) < 0) {
+    if (!_delete(ptr)) {
         _leak_warn(file, line, "Double free detected");
         exit(EXIT_FAILURE);
     }
