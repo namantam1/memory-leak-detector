@@ -78,16 +78,16 @@ void _generate_report() {
     printf("/*========= SUMMARY =========*/\n");
     printf("  Total allocations      %d  \n", memoryData.allocations);
     printf("  Total Free             %d  \n", memoryData.free);
-    printf("  Total Memory allocated %ld bytes \n", memoryData.total_allocated);
-    printf("  Total Memory freed     %ld bytes \n", memoryData.total_freed);
-    printf("  Memory Leaked          %ld bytes \n", memoryData.total_allocated - memoryData.total_freed);
+    printf("  Total Memory allocated %lu bytes \n", memoryData.total_allocated);
+    printf("  Total Memory freed     %lu bytes \n", memoryData.total_freed);
+    printf("  Memory Leaked          %lu bytes \n", memoryData.total_allocated - memoryData.total_freed);
 
     if (memoryData.total_freed == memoryData.total_allocated) return;
     printf("\n/*===== DETAILED REPORT =====*/\n");
 
     for (int i=0; i<LEAK_MEM_SIZE; i++) {
         if (memoryData.mem[i].address != 0) {
-            printf("Memory leak at %s:%d (%ld bytes)\n", 
+            printf("Memory leak at %s:%d (%lu bytes)\n", 
                 memoryData.mem[i].file,
                 memoryData.mem[i].line,
                 memoryData.mem[i].size);
